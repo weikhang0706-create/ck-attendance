@@ -540,14 +540,36 @@ let selectedLeaveType = null;
 let adminPassword = null;
 
 // ---------- API helper ----------
-async function api(action, params = {}) {
-  const url = new URL(API_URL);
-  url.searchParams.set('action', action);
-  url.searchParams.set('key', API_KEY);
-  url.searchParams.set('_', Date.now()); // cache-buster — prevents stale cached responses
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const res = await fetch(url, { method: 'GET', redirect: 'follow', cache: 'no-store' });
-  return res.json();
+let jsonpCounter = 0;
+function api(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'ckCallback_' + (jsonpCounter++) + '_' + Date.now();
+    const url = new URL(API_URL);
+    url.searchParams.set('action', action);
+    url.searchParams.set('key', API_KEY);
+    url.searchParams.set('callback', cbName);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+    const script = document.createElement('script');
+    const cleanup = () => { delete window[cbName]; script.remove(); };
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      reject(new Error('Request timed out — check your connection'));
+    }, 15000);
+
+    window[cbName] = (data) => {
+      clearTimeout(timeoutId);
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      cleanup();
+      reject(new Error('Network error'));
+    };
+    script.src = url.toString();
+    document.body.appendChild(script);
+  });
 }
 
 function showToast(msg) {
@@ -1121,26 +1143,4 @@ async function savePayrollRow(staffId, basicSalary) {
   else showToast(r.error || 'Failed to save');
 }
 
-// ---------- Boot ----------
-function boot() {
-  buildKeypad();
-  renderPinDots();
-
-  const savedAdmin = sessionStorage.getItem('ck_admin_pass');
-  const savedStaff = localStorage.getItem('ck_staff');
-
-  if (savedAdmin) {
-    adminPassword = savedAdmin;
-    enterAdminApp();
-  } else if (savedStaff) {
-    currentStaff = JSON.parse(savedStaff);
-    enterStaffApp();
-  }
-}
-boot();
-
-// Service worker removed — it was breaking cross-origin API calls to Google Apps Script.
-// The app still works and can still be added to your phone's home screen without it.
-</script>
-</body>
-</html>
+// ---------- Boot
