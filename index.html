@@ -197,6 +197,94 @@
   .btn-approve{background:var(--ok);color:white;}
   .btn-reject{background:var(--danger);color:white;}
   .link-btn{background:none;border:none;color:var(--gold);font-size:13px;cursor:pointer;text-decoration:underline;}
+
+  /* CALENDAR */
+  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:14px;align-items:center;}
+  .cal-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px;}
+  .cal-dot.annual{background:var(--gold);}
+  .cal-dot.mc{background:var(--danger);}
+  .cal-dot.unpaid{background:var(--muted);}
+  .cal-dot.ph{background:#5B8DEF;}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);font-size:10px;color:var(--muted);text-align:center;margin-bottom:6px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-cell{min-height:58px;background:var(--navy-light);border-radius:8px;padding:4px;}
+  .cal-cell.empty{background:transparent;}
+  .cal-daynum{font-size:10px;color:var(--muted);margin-bottom:3px;}
+  .cal-cell.today{outline:1px solid var(--gold);}
+  .cal-cell.today .cal-daynum{color:var(--gold);font-weight:700;}
+  .cal-entry{border-radius:4px;padding:1px 4px;margin-bottom:2px;font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cal-entry.annual{background:var(--gold);color:var(--navy);}
+  .cal-entry.mc{background:var(--danger);color:white;}
+  .cal-entry.unpaid{background:var(--muted);color:var(--navy);}
+  .cal-entry.ph{background:#5B8DEF;color:white;}
+  .cal-more{font-size:9px;color:var(--muted);}
+
+  .summary-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .summary-table th,.summary-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;}
+  .summary-table th{color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;}
+  .payroll-input{width:90px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:var(--navy-light);color:var(--cream);font-size:12px;font-family:inherit;}
+  .payroll-input.note{width:130px;}
+
+  /* ===== DESKTOP DASHBOARD LAYOUT (admin only — staff app stays phone-style) ===== */
+  @media (min-width: 900px) {
+    #app:has(#adminApp:not(.hidden)) { max-width: 1200px; }
+    body:has(#adminApp:not(.hidden)) { padding-bottom: 0; }
+
+    #adminApp {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "header header" "sidebar content";
+      column-gap: 28px;
+      min-height: 100vh;
+      padding: 24px 24px 40px;
+    }
+    #adminApp > header { grid-area: header; padding: 0 0 24px; }
+    #adminApp > main { grid-area: content; padding: 0; min-width: 0; }
+
+    #adminApp .tabbar {
+      grid-area: sidebar;
+      position: static;
+      max-width: none;
+      flex-direction: column;
+      background: var(--navy-card);
+      border: 1px solid rgba(197,160,89,0.08);
+      border-radius: var(--radius);
+      padding: 14px;
+      gap: 4px;
+      height: fit-content;
+    }
+    #adminApp .tab {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    #adminApp .tab.active { background: rgba(197,160,89,0.14); }
+    #adminApp .tab-icon { font-size: 16px; }
+
+    #adminApp .admin-header { margin-bottom: 16px; }
+    #adminApp .section-title { font-size: 12px; }
+
+    #pendingLeaveList, #staffStatusList, #staffMgmtList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    #pendingLeaveList .staff-row,
+    #staffStatusList .staff-row,
+    #staffMgmtList .staff-row { margin-bottom: 0; }
+    #pendingLeaveList .empty-note,
+    #staffStatusList .empty-note,
+    #staffMgmtList .empty-note { grid-column: 1 / -1; }
+
+    #adminTabStaff .card { max-width: 640px; }
+    #adminTabStaff .row-2 { grid-template-columns: 1fr 1fr; }
+    .cal-cell { min-height: 92px; padding: 6px; }
+    .cal-entry { font-size: 11px; padding: 2px 5px; }
+  }
 </style>
 </head>
 <body>
@@ -339,6 +427,34 @@
         <div id="staffStatusList"><div class="empty-note">Loading…</div></div>
       </div>
 
+      <div id="adminTabCalendar" class="hidden">
+        <div class="admin-header">
+          <div class="section-title" style="margin:0;">Leave Calendar</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="icon-btn" onclick="changeCalendarMonth(-1)">‹</button>
+            <span id="calendarMonthLabel" style="font-size:13px;font-weight:600;min-width:120px;text-align:center;"></span>
+            <button class="icon-btn" onclick="changeCalendarMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="cal-legend">
+            <span><span class="cal-dot annual"></span>Annual</span>
+            <span><span class="cal-dot mc"></span>MC</span>
+            <span><span class="cal-dot unpaid"></span>Unpaid</span>
+            <span><span class="cal-dot ph"></span>PH</span>
+          </div>
+          <div class="cal-weekdays">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div class="cal-grid" id="calendarGrid"></div>
+        </div>
+
+        <div class="section-title">Leave Taken This Year — <span id="summaryYearLabel"></span></div>
+        <div class="card" style="overflow-x:auto;">
+          <table class="summary-table" id="summaryTable"></table>
+        </div>
+      </div>
+
       <div id="adminTabStaff" class="hidden">
         <div class="admin-header">
           <div class="section-title" style="margin:0;" id="staffFormTitle">Add Staff</div>
@@ -368,6 +484,8 @@
               <input type="number" id="sfMc" placeholder="14">
             </div>
           </div>
+          <label>Basic Salary (RM/month)</label>
+          <input type="number" id="sfSalary" placeholder="e.g. 2500">
           <button class="submit-btn" onclick="saveStaff()">Save Staff Member</button>
           <div class="error-msg" id="staffFormError"></div>
         </div>
@@ -375,14 +493,33 @@
         <div class="section-title">All Staff</div>
         <div id="staffMgmtList"><div class="empty-note">Loading…</div></div>
       </div>
+
+      <div id="adminTabPayroll" class="hidden">
+        <div class="admin-header">
+          <div class="section-title" style="margin:0;">Payroll</div>
+          <input type="month" id="payrollMonthInput" onchange="loadPayroll()">
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table class="summary-table" id="payrollTable"></table>
+        </div>
+        <div class="empty-note" style="text-align:left;padding:10px 4px;">
+          Basic salary comes from each staff member's profile (Staff tab). Enter commission and deductions for the month, then tap Save on each row. This doesn't calculate EPF/SOCSO/PCB — use it as a tracker alongside your actual payroll process.
+        </div>
+      </div>
     </main>
 
     <div class="tabbar">
       <div class="tab active" data-admintab="Dashboard" onclick="switchAdminTab('Dashboard')">
         <div class="tab-icon">📊</div>Dashboard
       </div>
+      <div class="tab" data-admintab="Calendar" onclick="switchAdminTab('Calendar')">
+        <div class="tab-icon">🗓️</div>Calendar
+      </div>
       <div class="tab" data-admintab="Staff" onclick="switchAdminTab('Staff')">
         <div class="tab-icon">👤</div>Staff
+      </div>
+      <div class="tab" data-admintab="Payroll" onclick="switchAdminTab('Payroll')">
+        <div class="tab-icon">💰</div>Payroll
       </div>
     </div>
   </div>
@@ -739,9 +876,13 @@ async function decideLeave(requestId, action) {
 // ---------- Admin: Staff Management ----------
 function switchAdminTab(name) {
   document.getElementById('adminTabDashboard').classList.toggle('hidden', name !== 'Dashboard');
+  document.getElementById('adminTabCalendar').classList.toggle('hidden', name !== 'Calendar');
   document.getElementById('adminTabStaff').classList.toggle('hidden', name !== 'Staff');
+  document.getElementById('adminTabPayroll').classList.toggle('hidden', name !== 'Payroll');
   document.querySelectorAll('[data-admintab]').forEach(el => el.classList.toggle('active', el.dataset.admintab === name));
   if (name === 'Staff') loadStaffMgmt();
+  if (name === 'Calendar') loadCalendar();
+  if (name === 'Payroll') loadPayroll();
 }
 
 function resetStaffForm() {
@@ -754,6 +895,7 @@ function resetStaffForm() {
   document.getElementById('sfPin').value = '';
   document.getElementById('sfAnnual').value = '';
   document.getElementById('sfMc').value = '';
+  document.getElementById('sfSalary').value = '';
   document.getElementById('staffFormTitle').textContent = 'Add Staff';
   document.getElementById('cancelEditBtn').classList.add('hidden');
   document.getElementById('staffFormError').textContent = '';
@@ -769,6 +911,7 @@ function populateStaffForm(s) {
   document.getElementById('sfPin').value = s.pin;
   document.getElementById('sfAnnual').value = s.annual;
   document.getElementById('sfMc').value = s.mc;
+  document.getElementById('sfSalary').value = s.basicSalary;
   document.getElementById('staffFormTitle').textContent = 'Edit ' + s.name;
   document.getElementById('cancelEditBtn').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -786,11 +929,12 @@ async function saveStaff() {
   const pin = document.getElementById('sfPin').value.trim();
   const annual = document.getElementById('sfAnnual').value;
   const mc = document.getElementById('sfMc').value;
+  const salary = document.getElementById('sfSalary').value;
 
   if (!name) { err.textContent = 'Name is required'; return; }
   if (!/^\d{4}$/.test(pin)) { err.textContent = 'PIN must be exactly 4 digits'; return; }
 
-  const params = { password: adminPassword, name, phone, ic, position, joinDate, pin, annual, mc };
+  const params = { password: adminPassword, name, phone, ic, position, joinDate, pin, annual, mc, salary };
   const r = staffId
     ? await api('updateStaff', { ...params, staffId })
     : await api('addStaff', params);
@@ -838,6 +982,142 @@ async function removeStaff(staffId, name) {
   const r = await api('deleteStaff', { password: adminPassword, staffId });
   if (r.success) { showToast('Removed'); loadStaffMgmt(); }
   else showToast(r.error || 'Failed');
+}
+
+// ---------- Admin: Calendar + Leave Summary ----------
+let calendarDate = new Date();
+let calendarLeaveCache = [];
+let calendarLoadedYear = null;
+
+function changeCalendarMonth(delta) {
+  calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + delta, 1);
+  if (calendarDate.getFullYear() !== calendarLoadedYear) {
+    loadCalendar();
+  } else {
+    renderCalendar();
+  }
+}
+
+async function loadCalendar() {
+  const year = calendarDate.getFullYear();
+  const r = await api('leaveSummary', { password: adminPassword, year });
+  if (!r.success) { showToast(r.error || 'Failed to load'); return; }
+  calendarLeaveCache = r.leave;
+  calendarLoadedYear = r.year;
+  renderSummaryTable(r.summary, r.year);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calendarMonthLabel').textContent =
+    calendarDate.toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
+
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+  const startWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStrVal = new Date().toISOString().slice(0, 10);
+
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < startWeekday; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell empty';
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const entries = calendarLeaveCache.filter(l => dateStr >= l.startDate && dateStr <= l.endDate);
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell' + (dateStr === todayStrVal ? ' today' : '');
+    const shown = entries.slice(0, 3).map(l => {
+      const cls = l.leaveType.toLowerCase();
+      return `<div class="cal-entry ${cls}" title="${l.name} — ${l.leaveType}">${l.name.split(' ')[0]}</div>`;
+    }).join('');
+    const more = entries.length > 3 ? `<div class="cal-more">+${entries.length - 3} more</div>` : '';
+    cell.innerHTML = `<div class="cal-daynum">${d}</div>${shown}${more}`;
+    grid.appendChild(cell);
+  }
+}
+
+function renderSummaryTable(summary, year) {
+  document.getElementById('summaryYearLabel').textContent = year;
+  const table = document.getElementById('summaryTable');
+  if (!summary.length) {
+    table.innerHTML = '<tr><td class="empty-note">No staff added yet</td></tr>';
+    return;
+  }
+  table.innerHTML = `
+    <thead><tr>
+      <th>Name</th><th>Annual Taken</th><th>Annual Left</th><th>MC Taken</th><th>MC Left</th><th>Unpaid</th><th>PH</th>
+    </tr></thead>
+    <tbody>
+      ${summary.map(s => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.annualTaken}</td>
+          <td>${s.annualBalance}</td>
+          <td>${s.mcTaken}</td>
+          <td>${s.mcBalance}</td>
+          <td>${s.unpaidTaken}</td>
+          <td>${s.phTaken}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+// ---------- Admin: Payroll ----------
+async function loadPayroll() {
+  const monthInput = document.getElementById('payrollMonthInput');
+  if (!monthInput.value) monthInput.value = new Date().toISOString().slice(0, 7);
+  const r = await api('payrollMonth', { password: adminPassword, month: monthInput.value });
+  if (!r.success) { showToast(r.error || 'Failed to load'); return; }
+  renderPayrollTable(r.rows);
+}
+
+function renderPayrollTable(rows) {
+  const table = document.getElementById('payrollTable');
+  if (!rows.length) {
+    table.innerHTML = '<tr><td class="empty-note">No staff added yet</td></tr>';
+    return;
+  }
+  table.innerHTML = `
+    <thead><tr>
+      <th>Name</th><th>Basic (RM)</th><th>Commission (RM)</th><th>Deduction (RM)</th><th>Note</th><th>Net Pay</th><th></th>
+    </tr></thead>
+    <tbody>
+      ${rows.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${Number(r.basicSalary).toFixed(2)}</td>
+          <td><input class="payroll-input" type="number" id="pr-comm-${r.staffId}" value="${r.commission}" oninput="updateNetPay(${r.staffId}, ${r.basicSalary})"></td>
+          <td><input class="payroll-input" type="number" id="pr-ded-${r.staffId}" value="${r.deduction}" oninput="updateNetPay(${r.staffId}, ${r.basicSalary})"></td>
+          <td><input class="payroll-input note" type="text" id="pr-note-${r.staffId}" value="${r.note || ''}" placeholder="e.g. late, EPF"></td>
+          <td id="pr-net-${r.staffId}" style="font-weight:700;color:var(--gold);">RM ${Number(r.netPay).toFixed(2)}</td>
+          <td><button class="btn-approve" style="background:var(--teal);padding:6px 10px;" onclick="savePayrollRow(${r.staffId}, ${r.basicSalary})">Save</button></td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function updateNetPay(staffId, basicSalary) {
+  const comm = Number(document.getElementById('pr-comm-' + staffId).value) || 0;
+  const ded = Number(document.getElementById('pr-ded-' + staffId).value) || 0;
+  document.getElementById('pr-net-' + staffId).textContent = 'RM ' + (Number(basicSalary) + comm - ded).toFixed(2);
+}
+
+async function savePayrollRow(staffId, basicSalary) {
+  const month = document.getElementById('payrollMonthInput').value;
+  const commission = document.getElementById('pr-comm-' + staffId).value;
+  const deduction = document.getElementById('pr-ded-' + staffId).value;
+  const note = document.getElementById('pr-note-' + staffId).value;
+  const r = await api('savePayroll', { password: adminPassword, month, staffId, commission, deduction, note });
+  if (r.success) showToast('Saved');
+  else showToast(r.error || 'Failed to save');
 }
 
 // ---------- Boot ----------
