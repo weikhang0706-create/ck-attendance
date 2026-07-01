@@ -530,7 +530,7 @@
 
 <script>
 /* ============== CONFIG — replace after deploying Apps Script ============== */
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzlAWA4MGjN1x6Hy5_KAkhZ4k8apo5qcaBknwsr6IRi2f9dne-E_oBHTjbv0a51nnw6/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzlAWA4MGjN1x6Hy5_KAkhZ4k8apo5qcaBknwsr6IRi2f9dne-E_oBHTjbv0a51nnw6/exec';
 const API_KEY = 'ckgroup2026x9f'; // must match API_KEY in the .gs file
 /* ========================================================================= */
 
@@ -1142,4 +1142,9 @@ boot();
 // Register service worker for installability
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    na
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
