@@ -1139,12 +1139,8 @@ function boot() {
 }
 boot();
 
-// Register service worker for installability
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
-}
+// Service worker removed — it was breaking cross-origin API calls to Google Apps Script.
+// The app still works and can still be added to your phone's home screen without it.
 </script>
 </body>
 </html>
