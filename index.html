@@ -41,11 +41,10 @@
   }
   .brand{display:flex;align-items:center;gap:10px;}
   .brand-mark{
-    width:36px;height:36px;border-radius:10px;
-    background:linear-gradient(135deg,var(--gold),#9c7a3a);
+    width:36px;height:36px;
     display:flex;align-items:center;justify-content:center;
-    font-weight:700;color:var(--navy);font-size:14px;
   }
+  .brand-mark img{width:100%;height:100%;object-fit:contain;}
   .brand-text{font-size:15px;font-weight:600;letter-spacing:0.3px;}
   .brand-text small{display:block;font-size:11px;color:var(--muted);font-weight:400;}
   .icon-btn{
@@ -70,11 +69,10 @@
     min-height:100vh;padding:20px;text-align:center;
   }
   .login-mark{
-    width:64px;height:64px;border-radius:16px;
-    background:linear-gradient(135deg,var(--gold),#9c7a3a);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700;color:var(--navy);font-size:24px;margin-bottom:18px;
+    width:96px;height:96px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;
   }
+  .login-mark img{width:100%;height:100%;object-fit:contain;}
   .login-screen h1{font-size:20px;margin:0 0 4px;font-weight:600;}
   .login-screen p{color:var(--muted);font-size:13px;margin:0 0 28px;}
   .pin-dots{display:flex;gap:12px;margin-bottom:24px;}
@@ -222,6 +220,15 @@
   .summary-table{width:100%;border-collapse:collapse;font-size:12px;}
   .summary-table th,.summary-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;}
   .summary-table th{color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px;}
+  .mini-stat{background:var(--navy-card);border:1px solid rgba(197,160,89,0.08);border-radius:12px;padding:14px;}
+  .mini-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .mini-stat-value{font-size:22px;font-weight:700;color:var(--gold);}
+  .mini-stat-value.danger{color:var(--danger);}
+  .mini-stat-value.warn{color:var(--warn);}
+  .mini-stat-value.ok{color:var(--ok);}
+  .ranked-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .ranked-row:last-child{border-bottom:none;}
   .payroll-input{width:90px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:var(--navy-light);color:var(--cream);font-size:12px;font-family:inherit;}
   .payroll-input.note{width:130px;}
 
@@ -292,7 +299,7 @@
 
   <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="login-screen">
-    <div class="login-mark">CK</div>
+    <div class="login-mark"><img src="logo.png" alt="CK Group"></div>
     <h1>CK Group Attendance</h1>
     <p>Enter your 4-digit PIN</p>
     <div class="pin-dots" id="pinDots"></div>
@@ -305,7 +312,7 @@
 
   <!-- ADMIN LOGIN -->
   <div id="adminLoginScreen" class="login-screen hidden">
-    <div class="login-mark">CK</div>
+    <div class="login-mark"><img src="logo.png" alt="CK Group"></div>
     <h1>Management Dashboard</h1>
     <p>Enter admin password</p>
     <input type="password" id="adminPassInput" placeholder="Password" style="text-align:center;font-size:16px;margin-bottom:14px;">
@@ -320,7 +327,7 @@
   <div id="staffApp" class="hidden">
     <header>
       <div class="brand">
-        <div class="brand-mark">CK</div>
+        <div class="brand-mark"><img src="logo.png" alt="CK Group"></div>
         <div class="brand-text">CK Group<small id="staffNameHeader">Staff</small></div>
       </div>
       <button class="icon-btn" onclick="logout()">⏻</button>
@@ -410,7 +417,7 @@
   <div id="adminApp" class="hidden">
     <header>
       <div class="brand">
-        <div class="brand-mark">CK</div>
+        <div class="brand-mark"><img src="logo.png" alt="CK Group"></div>
         <div class="brand-text">Dashboard<small id="adminDateHeader">Today</small></div>
       </div>
       <button class="icon-btn" onclick="logoutAdmin()">⏻</button>
@@ -425,6 +432,34 @@
 
         <div class="section-title">Today's Attendance</div>
         <div id="staffStatusList"><div class="empty-note">Loading…</div></div>
+      </div>
+
+      <div id="adminTabAttendance" class="hidden">
+        <div class="admin-header">
+          <div class="section-title" style="margin:0;">Attendance Lookup</div>
+          <input type="date" id="attDateInput" onchange="loadAttendanceByDate()">
+        </div>
+        <div class="stat-grid" id="attDateSummary"></div>
+        <div class="card" style="overflow-x:auto;">
+          <table class="summary-table" id="attDateTable"></table>
+        </div>
+
+        <div class="admin-header">
+          <div class="section-title" style="margin:0;">Monthly Attendance & Leave Issues</div>
+          <input type="month" id="attMonthInput" onchange="loadMonthlySummary()">
+        </div>
+        <div class="stat-grid" id="monthSummaryStats"></div>
+
+        <div class="section-title">Staff With Most Issues This Month</div>
+        <div class="card" id="rankedIssuesCard"></div>
+
+        <div class="section-title">Per-Staff Breakdown</div>
+        <div class="card" style="overflow-x:auto;">
+          <table class="summary-table" id="monthlySummaryTable"></table>
+        </div>
+        <div class="empty-note" style="text-align:left;padding:10px 4px;">
+          "Late" = checked in after 9:15 AM. "No Checkout" = checked in but never checked out that day.
+        </div>
       </div>
 
       <div id="adminTabCalendar" class="hidden">
@@ -511,6 +546,9 @@
     <div class="tabbar">
       <div class="tab active" data-admintab="Dashboard" onclick="switchAdminTab('Dashboard')">
         <div class="tab-icon">📊</div>Dashboard
+      </div>
+      <div class="tab" data-admintab="Attendance" onclick="switchAdminTab('Attendance')">
+        <div class="tab-icon">🕐</div>Attendance
       </div>
       <div class="tab" data-admintab="Calendar" onclick="switchAdminTab('Calendar')">
         <div class="tab-icon">🗓️</div>Calendar
@@ -821,6 +859,11 @@ function enterAdminApp() {
   loadDashboard();
 }
 
+function locationLink(lat, lng) {
+  if (!lat || !lng) return '—';
+  return `<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" style="color:var(--gold);text-decoration:underline;">📍 View</a>`;
+}
+
 async function loadDashboard() {
   const r = await api('dashboard', { password: adminPassword });
   if (!r.success) { showToast(r.error || 'Failed to load'); return; }
@@ -859,7 +902,7 @@ async function loadDashboard() {
           <span class="status-dot ${dot}"></span>
           <div>
             <div class="staff-name">${s.name}</div>
-            <div class="staff-meta">${label}</div>
+            <div class="staff-meta">${label}${s.lat && s.lng ? ' · ' + locationLink(s.lat, s.lng) : ''}</div>
           </div>
         </div>
         <div class="staff-meta">AL ${s.annualBalance} · MC ${s.mcBalance}</div>
@@ -874,9 +917,117 @@ async function decideLeave(requestId, action) {
   else showToast(r.error || 'Failed');
 }
 
+// ---------- Admin: Attendance lookup (any date) + monthly issue summary ----------
+async function loadAttendanceByDate() {
+  const dateInput = document.getElementById('attDateInput');
+  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  const r = await api('attendanceByDate', { password: adminPassword, date: dateInput.value });
+  if (!r.success) { showToast(r.error || 'Failed to load'); return; }
+  renderAttDateSummary(r.totals);
+  renderAttDateTable(r.rows);
+}
+
+function renderAttDateSummary(t) {
+  const wrap = document.getElementById('attDateSummary');
+  wrap.innerHTML = `
+    <div class="mini-stat"><div class="mini-stat-label">Present</div><div class="mini-stat-value ok">${t.totalPresent}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">Absent</div><div class="mini-stat-value danger">${t.totalAbsent}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">On Leave</div><div class="mini-stat-value warn">${t.totalOnLeave}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">Late</div><div class="mini-stat-value danger">${t.totalLate}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">No Checkout</div><div class="mini-stat-value warn">${t.totalMissingCheckout}</div></div>
+  `;
+}
+
+function renderAttDateTable(rows) {
+  const table = document.getElementById('attDateTable');
+  if (!rows.length) { table.innerHTML = '<tr><td class="empty-note">No staff added yet</td></tr>'; return; }
+  table.innerHTML = `
+    <thead><tr>
+      <th>Name</th><th>Check In</th><th>Check Out</th><th>Location</th><th>Status</th>
+    </tr></thead>
+    <tbody>
+      ${rows.map(r => {
+        let badges = '';
+        if (r.onLeave) badges += '<span class="badge Approved">On Leave</span> ';
+        if (r.isLate) badges += '<span class="badge Pending">Late</span> ';
+        if (r.missingCheckout) badges += '<span class="badge Rejected">No Checkout</span> ';
+        if (!r.checkedInAt && !r.onLeave) badges = '<span class="badge Rejected">Absent</span>';
+        return `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.checkedInAt || '—'}</td>
+          <td>${r.checkedOutAt || '—'}</td>
+          <td>${locationLink(r.lat, r.lng)}</td>
+          <td>${badges || '—'}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  `;
+}
+
+async function loadMonthlySummary() {
+  const monthInput = document.getElementById('attMonthInput');
+  if (!monthInput.value) monthInput.value = new Date().toISOString().slice(0, 7);
+  const r = await api('monthlySummary', { password: adminPassword, month: monthInput.value });
+  if (!r.success) { showToast(r.error || 'Failed to load'); return; }
+  renderMonthSummaryStats(r.totals);
+  renderRankedIssues(r.ranked);
+  renderMonthlySummaryTable(r.summary);
+}
+
+function renderMonthSummaryStats(t) {
+  const wrap = document.getElementById('monthSummaryStats');
+  wrap.innerHTML = `
+    <div class="mini-stat"><div class="mini-stat-label">Late Incidents</div><div class="mini-stat-value danger">${t.totalLate}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">No Checkout</div><div class="mini-stat-value warn">${t.totalMissingCheckout}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">Pending Leave</div><div class="mini-stat-value">${t.totalPendingLeave}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">Annual Taken</div><div class="mini-stat-value">${t.leaveTotals.annual}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">MC Taken</div><div class="mini-stat-value">${t.leaveTotals.mc}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">Unpaid Taken</div><div class="mini-stat-value">${t.leaveTotals.unpaid}</div></div>
+    <div class="mini-stat"><div class="mini-stat-label">PH Taken</div><div class="mini-stat-value">${t.leaveTotals.ph}</div></div>
+  `;
+}
+
+function renderRankedIssues(ranked) {
+  const card = document.getElementById('rankedIssuesCard');
+  if (!ranked.length) { card.innerHTML = '<div class="empty-note">No late check-ins or missed checkouts this month — clean record</div>'; return; }
+  card.innerHTML = ranked.map((r, i) => `
+    <div class="ranked-row">
+      <div class="staff-name">${i + 1}. ${r.name}</div>
+      <div class="staff-meta">${r.daysLate} late · ${r.daysMissingCheckout} no checkout</div>
+    </div>
+  `).join('');
+}
+
+function renderMonthlySummaryTable(summary) {
+  const table = document.getElementById('monthlySummaryTable');
+  if (!summary.length) { table.innerHTML = '<tr><td class="empty-note">No staff added yet</td></tr>'; return; }
+  table.innerHTML = `
+    <thead><tr>
+      <th>Name</th><th>Days Present</th><th>Late</th><th>No Checkout</th><th>Annual</th><th>MC</th><th>Unpaid</th><th>PH</th><th>Pending Leave</th>
+    </tr></thead>
+    <tbody>
+      ${summary.map(s => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.daysPresent}</td>
+          <td>${s.daysLate > 0 ? '<span style="color:var(--danger);font-weight:600;">' + s.daysLate + '</span>' : '0'}</td>
+          <td>${s.daysMissingCheckout > 0 ? '<span style="color:var(--warn);font-weight:600;">' + s.daysMissingCheckout + '</span>' : '0'}</td>
+          <td>${s.annualTaken}</td>
+          <td>${s.mcTaken}</td>
+          <td>${s.unpaidTaken}</td>
+          <td>${s.phTaken}</td>
+          <td>${s.pendingLeaveCount > 0 ? '<span style="color:var(--gold);font-weight:600;">' + s.pendingLeaveCount + '</span>' : '0'}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
 // ---------- Admin: Staff Management ----------
 function switchAdminTab(name) {
   document.getElementById('adminTabDashboard').classList.toggle('hidden', name !== 'Dashboard');
+  document.getElementById('adminTabAttendance').classList.toggle('hidden', name !== 'Attendance');
   document.getElementById('adminTabCalendar').classList.toggle('hidden', name !== 'Calendar');
   document.getElementById('adminTabStaff').classList.toggle('hidden', name !== 'Staff');
   document.getElementById('adminTabPayroll').classList.toggle('hidden', name !== 'Payroll');
@@ -884,6 +1035,7 @@ function switchAdminTab(name) {
   if (name === 'Staff') loadStaffMgmt();
   if (name === 'Calendar') loadCalendar();
   if (name === 'Payroll') loadPayroll();
+  if (name === 'Attendance') { loadAttendanceByDate(); loadMonthlySummary(); }
 }
 
 function resetStaffForm() {
