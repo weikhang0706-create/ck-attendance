@@ -512,21 +512,11 @@
           <div class="row-2" style="margin-top:14px;">
             <div>
               <label style="margin-top:0;">Annual Leave Entitlement (days/yr)</label>
-              <input type="number" id="sfAnnualEnt" placeholder="14" oninput="mirrorEntitlement('sfAnnualEnt','sfAnnual')">
+              <input type="number" id="sfAnnualEnt" placeholder="14">
             </div>
-            <div>
-              <label style="margin-top:0;">Annual Leave Balance (remaining)</label>
-              <input type="number" id="sfAnnual" placeholder="14">
-            </div>
-          </div>
-          <div class="row-2">
             <div>
               <label style="margin-top:0;">MC Entitlement (days/yr)</label>
-              <input type="number" id="sfMcEnt" placeholder="14" oninput="mirrorEntitlement('sfMcEnt','sfMc')">
-            </div>
-            <div>
-              <label style="margin-top:0;">MC Balance (remaining)</label>
-              <input type="number" id="sfMc" placeholder="14">
+              <input type="number" id="sfMcEnt" placeholder="14">
             </div>
           </div>
           <label>Basic Salary (RM/month)</label>
@@ -1048,15 +1038,6 @@ function switchAdminTab(name) {
   if (name === 'Attendance') { loadAttendanceByDate(); loadMonthlySummary(); }
 }
 
-function mirrorEntitlement(entId, balId) {
-  // Only auto-fill balance from entitlement when adding a NEW staff member —
-  // never overwrite an existing staff's already-used balance while editing.
-  const isNew = !document.getElementById('editStaffId').value;
-  if (isNew) {
-    document.getElementById(balId).value = document.getElementById(entId).value;
-  }
-}
-
 function resetStaffForm() {
   document.getElementById('editStaffId').value = '';
   document.getElementById('sfName').value = '';
@@ -1066,9 +1047,7 @@ function resetStaffForm() {
   document.getElementById('sfJoinDate').value = '';
   document.getElementById('sfPin').value = '';
   document.getElementById('sfAnnualEnt').value = '';
-  document.getElementById('sfAnnual').value = '';
   document.getElementById('sfMcEnt').value = '';
-  document.getElementById('sfMc').value = '';
   document.getElementById('sfSalary').value = '';
   document.getElementById('staffFormTitle').textContent = 'Add Staff';
   document.getElementById('cancelEditBtn').classList.add('hidden');
@@ -1084,9 +1063,7 @@ function populateStaffForm(s) {
   document.getElementById('sfJoinDate').value = s.joinDate ? s.joinDate.split('T')[0] : '';
   document.getElementById('sfPin').value = s.pin;
   document.getElementById('sfAnnualEnt').value = s.annualEntitlement;
-  document.getElementById('sfAnnual').value = s.annual;
   document.getElementById('sfMcEnt').value = s.mcEntitlement;
-  document.getElementById('sfMc').value = s.mc;
   document.getElementById('sfSalary').value = s.basicSalary;
   document.getElementById('staffFormTitle').textContent = 'Edit ' + s.name;
   document.getElementById('cancelEditBtn').classList.remove('hidden');
@@ -1104,15 +1081,13 @@ async function saveStaff() {
   const joinDate = document.getElementById('sfJoinDate').value;
   const pin = document.getElementById('sfPin').value.trim();
   const annualEnt = document.getElementById('sfAnnualEnt').value;
-  const annual = document.getElementById('sfAnnual').value;
   const mcEnt = document.getElementById('sfMcEnt').value;
-  const mc = document.getElementById('sfMc').value;
   const salary = document.getElementById('sfSalary').value;
 
   if (!name) { err.textContent = 'Name is required'; return; }
   if (!/^\d{4}$/.test(pin)) { err.textContent = 'PIN must be exactly 4 digits'; return; }
 
-  const params = { password: adminPassword, name, phone, ic, position, joinDate, pin, annualEnt, annual, mcEnt, mc, salary };
+  const params = { password: adminPassword, name, phone, ic, position, joinDate, pin, annualEnt, mcEnt, salary };
   const r = staffId
     ? await api('updateStaff', { ...params, staffId })
     : await api('addStaff', params);
